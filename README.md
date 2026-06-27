@@ -3,49 +3,57 @@
 ## Group Members
 Zilun He
 
+## Main Notebook
+[climate_finance_risk_analysis.ipynb](climate_finance_risk_analysis.ipynb)
+
 ## Research Question
-Are higher temperature anomalies and more frequent climate-related disasters associated with higher U.S. equity market risk and different sector-level risk patterns?
+Can a simple Climate VaR-style risk signal, built from temperature anomalies and disaster frequency, help explain U.S. equity-market risk and guide a mock sector-allocation portfolio?
 
 ## Project Summary
-This project will combine climate data, disaster frequency data, and financial market data to study whether high-climate-risk periods are associated with higher equity-market volatility, deeper drawdowns, and different sector-level risk patterns. I will use NASA temperature anomaly data as the climate signal, NOAA billion-dollar disaster frequency data as a disaster-risk proxy, and `yfinance` data for SPY, VIX, and sector ETFs. The analysis will align the datasets by time, compare normal and high-climate-risk periods, and produce clear figures showing climate anomalies, disaster frequency, market volatility, sector differences, and long-horizon risk behavior.
+This project applies a simplified Climate VaR methodology to public data. It uses NASA temperature anomalies as the climate input, NOAA billion-dollar disaster frequency as a physical-damage proxy, and `yfinance` ETF data as the financial-market outcome. Instead of estimating a full firm-level Climate VaR or running an integrated assessment model, the notebook builds a transparent climate-risk score, tests whether that score lines up with market and sector risk, and then runs a $50 million mock climate-risk-aware portfolio against an equal-weight benchmark from 2009 onward.
+
+In the historical backtest, the climate-risk-aware mock portfolio ends at about **$570 million**, compared with about **$411 million** for the equal-weight benchmark. The mock portfolio also has a lower maximum drawdown in this sample. This result is a transparent historical illustration, not an investment recommendation.
 
 ## Datasets
-1. NASA GISTEMP Gridded Temperature Anomaly Data  
+1. NASA GISTEMP Global Temperature Anomaly CSV  
    Source: https://data.giss.nasa.gov/gistemp/data_v4.html  
-   Planned use: Load with Xarray and compute global or U.S.-level temperature anomaly over time.
+   Use: Main climate anomaly dataset.
 
-2. NASA Global Temperature Anomaly CSV  
-   Source: https://data.giss.nasa.gov/gistemp/data_v4.html  
-   Planned use: Use as a simpler global anomaly benchmark and validation dataset.
-
-3. NOAA Billion-Dollar Disaster Frequency Data  
+2. NOAA Billion-Dollar Disaster Frequency Data  
    Source: https://www.ncei.noaa.gov/access/billions/mapping  
-   Planned use: Aggregate U.S. disaster counts by year, state, and disaster category.
+   Use: Disaster frequency proxy, aggregated by year and disaster category.
 
-4. yfinance Market Data  
-   Tickers: `SPY`, `^VIX`, `^IRX`, `XLE`, `XLU`, `XLI`, `XLK`, `XLF`  
-   Planned use: Download broad-market, volatility-index, risk-free-rate, and sector ETF data for market-risk analysis.
+3. yfinance Market Data  
+   Tickers: `SPY`, `XLE`, `XLU`, `XLI`, `XLK`, `XLF`  
+   Use: Broad-market and sector ETF prices for market-risk analysis.
 
-## Planned Analysis
-I will first clean and align the climate, disaster, and financial datasets at a monthly or annual frequency. I will define high-climate-risk periods as periods in the top quartile of temperature anomaly or disaster frequency. Then I will compare market risk measures, including rolling volatility, drawdowns, downside return percentiles, and sector ETF volatility, across high- and lower-climate-risk periods.
-
-As an extension, I will compute long-horizon variance ratios:
+## Analysis
+The notebook follows a simplified version of the Climate VaR chain:
 
 ```text
-VR_k = Var(R_{t,t+k}) / [k * Var(R_{t,t+1})]
+climate input -> physical damage proxy -> financial risk measure -> portfolio implication
 ```
 
-This statistic will be used descriptively to compare whether long-horizon equity risk appears higher during high-climate-risk periods than would be implied by simply scaling short-term volatility.
+It first cleans and aligns the climate, disaster, and financial datasets. It then builds a climate-risk score from standardized temperature anomalies and standardized disaster frequency:
 
-## Planned Figures
-1. Global or U.S. temperature anomaly over time.
-2. U.S. billion-dollar disaster frequency by year and disaster category.
-3. Relationship between temperature anomaly and disaster frequency.
-4. SPY and sector ETF rolling volatility or drawdowns during high-climate-risk periods.
-5. Long-horizon variance ratio comparison across SPY and sector ETFs.
+```text
+ClimateRisk_t = z(TemperatureAnomaly_t) + z(DisasterFrequency_t)
+```
+
+High-climate-risk years are defined as years in the top quartile of this score. The analysis compares SPY volatility and sector ETF volatility across climate-risk regimes. Finally, it uses the previous year's climate-risk state to run a mock allocation rule: in lower-risk years the portfolio is equal-weighted across sector ETFs, while after high-climate-risk years it tilts toward utilities and technology and away from energy and industrials. The result is compared with an equal-weight benchmark using cumulative wealth, annualized return, volatility, downside return, and drawdown.
+
+## Figures
+1. Global temperature anomaly, U.S. billion-dollar disaster frequency, disaster-type breakdown, and five-year climate-input averages.
+2. Climate-risk score and high-climate-risk years.
+3. Portfolio allocation rule across sector ETFs.
+4. $50 million mock portfolio cumulative wealth and drawdown.
+5. Annual return comparison and yearly return difference.
 
 ## Tools
-Python, Pandas, Xarray, NumPy, `yfinance`, Matplotlib, SciPy or Statsmodels.
+Python, Pandas, NumPy, `yfinance`, and Matplotlib.
 
-## Expected Contribution
-This project will not make a causal claim that temperature directly drives equity returns. Instead, it will evaluate whether public data show descriptive links between climate anomalies, disaster frequency, market risk, sector sensitivity, and long-horizon variance behavior.
+## Contribution
+This project will not make a causal claim that temperature directly drives equity returns. Instead, it shows how Climate VaR methodology can be translated into a reproducible data-analysis workflow: build a climate-risk signal, compare financial risk across climate regimes, and evaluate a simple mock portfolio implication.
+
+## How to Run
+Open `climate_finance_risk_analysis.ipynb` and run the notebook from top to bottom. The data are downloaded directly inside the notebook.
